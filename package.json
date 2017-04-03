@@ -1,0 +1,27 @@
+{
+  "name": "library-application",
+  "version": "1.0.0",
+  "description": "a library management system",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eguono/library-application.git"
+  },
+  "keywords": [
+    "express",
+    "firebase",
+    "body-parser"
+  ],
+  "author": "Eguonoghene Efekemo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Eguono/library-application/issues"
+  },
+  "homepage": "https://github.com/Eguono/library-application#readme",
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
