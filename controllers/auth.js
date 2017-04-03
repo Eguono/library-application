@@ -1,8 +1,8 @@
 const firebase = require('../helper/firebase.js');
 const auth = firebase.auth();
 const db = firebase.database();
-const bodyParser = require("body-parser");
-const expressValidator = require("express-validator");
+const ref = db.ref('/');
+
 
 module.exports.login = (req, res) => {
     let email = req.body.email;
@@ -15,7 +15,7 @@ module.exports.login = (req, res) => {
     let errors = req.validationErrors();
 
     if (errors) {
-        let errormsg = errors.msg;
+        let errormsg = errors[0].msg;
         res.render('login', {
             error: errormsg
         });
@@ -32,18 +32,22 @@ module.exports.login = (req, res) => {
 }
 
 module.exports.register = (req, res) => {
-    let fullName = req.body.full_name;
-    let userName = req.body.user_name;
+    let fullName = req.body.fullName;
+    let userName = req.body.userName;
     let email = req.body.email;
     let password = req.body.password;
     let password1 = req.body.password1;
 
-    req.checkBody(fullName, 'Full Name is Required').notEmpty();
-    req.checkBody(userName, 'User Name is Required').notEmpty();
-    req.checkBody(email, 'Email is Required').notEmpty();
-    req.checkBody(email, 'Email is not valid').isEmail();
-    req.checkBody(password, 'Password is Required').notEmpty();
-    req.checkBody(password1, 'Passwords do not match').equals(password1);
+    req.checkBody('fullName', 'Full Name is Required').notEmpty();
+    req.checkBody('fullName', 'Invalid Full Name').isAlpha();
+    req.checkBody('userName', 'User Name is Required').notEmpty();
+    req.checkBody('userName', 'Must be alphabets').isAlpha();
+    req.checkBody('email', 'Email is Required').notEmpty();
+    req.checkBody('email', 'Email is not valid').isEmail();
+    req.checkBody('password', 'Password is Required').notEmpty();
+    req.checkBody('password1', 'Passwords do not match').equals(password);
+
+    
 
     let errors = req.validationErrors();
 
@@ -51,33 +55,34 @@ module.exports.register = (req, res) => {
         console.log(errors)
         let errormsg = errors[0].msg;
         return res.render('register', { error: errormsg });
-    }
-    auth.createUserWithEmailAndPassword(email, password)
-        .then((user) => {
-            user.updateProfile({
-                displayName: userName,
-                photoURL: "/img/blank-profile-picture.png"
-            }).catch((err) => {
+    } else {
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((user) => {
+                user.updateProfile({
+                    displayName: userName,
+                    photoURL: "/img/blank-profile-picture.png"
+                }).catch((err) => {
+                    let errorCode = err.code;
+                    let errorMessage = err.message;
+                    console.log(errorMessage);
+                });
+                user.sendEmailVerification();
+                let userId = user.uid;
+                let userRefs = ref.child("users/" + userId)
+                userRefs.set({
+                    fullName: fullName,
+                    displayName: userName,
+                    email: email,
+                    userId: userId
+                });
+                res.redirect('/dashboard');
+            })
+            .catch((err) => {
                 let errorCode = err.code;
                 let errorMessage = err.message;
-                console.log(errorMessage);
+                return res.render('register', { error: errorMessage })
             });
-            user.sendEmailVerification();
-            let userId = user.uid;
-            let userRefs = ref.child("users/" + userId)
-            userRefs.set({
-                fullName: fullName,
-                displayName: displayName,
-                email: email,
-                userId: userId
-            });
-            res.redirect('/dashboard');
-        })
-        .catch((err) => {
-            let errorCode = err.code;
-            let errorMessage = err.message;
-            return res.render('register', { error: errorMessage })
-        });
 
+    }
 
 }

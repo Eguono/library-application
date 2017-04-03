@@ -1,7 +1,8 @@
-const express = require("express")
-    , bodyParser = require("body-parser")
-    , expressValidator = require("express-validator")
-    , auth = require("./controllers/auth.js");
+const express = require("express");
+const bodyParser = require("body-parser");
+const expressValidator = require("express-validator");
+const auth = require("./controllers/auth.js");
+    // , expressSession = require("express-session");
 
 
 //Initializing Express Application
@@ -40,6 +41,12 @@ app.use(expressValidator({
         };
     }
 }));
+
+// app.use(expressSession({
+//     secret: 'max',
+//     resave: false,
+//     saveUninitialized: true
+// }));
 
 //Routing
 app.route('/')
